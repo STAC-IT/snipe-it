@@ -783,7 +783,7 @@ class AssetsController extends Controller
         // We don't want to log this as a normal update, so let's bypass that
         $asset->unsetEventDispatcher();
 
-	//$asset->next_audit_date = date('Y-m-d h:i:s');
+	
         $asset->next_audit_date = $request->input('next_audit_date');
         $asset->last_audit_date = date('Y-m-d h:i:s');
 
