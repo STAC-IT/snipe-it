@@ -783,9 +783,13 @@ class AssetsController extends Controller
         // We don't want to log this as a normal update, so let's bypass that
         $asset->unsetEventDispatcher();
 
+	//$asset->next_audit_date = date('Y-m-d h:i:s');
         $asset->next_audit_date = $request->input('next_audit_date');
         $asset->last_audit_date = date('Y-m-d h:i:s');
 
+        if (is_null($target = $asset->assignedTo)){
+        $asset->location_id = $request->input('location_id');
+        }
         if ($asset->save()) {
 
 
@@ -802,8 +806,8 @@ class AssetsController extends Controller
                     \Log::info($e);
                 }
             }
-
-            $asset->logAudit($request->input('note'), $request->input('location_id'), $filename);
+            $location = Location::find(request('location_id'))['name'];
+            $asset->logAudit($request->input('note').$location, $request->input('location_id'), $filename);
             return redirect()->to("hardware")->with('success', trans('admin/hardware/message.audit.success'));
         }
     }
