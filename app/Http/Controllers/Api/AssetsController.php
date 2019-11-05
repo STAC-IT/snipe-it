@@ -394,7 +394,7 @@ class AssetsController extends Controller
             $asset->use_text = $asset->present()->fullName;
 
             if (($asset->checkedOutToUser()) && ($asset->assigned)) {
-                $asset->use_text .= ' → '.$asset->assigned->getFullNameAttribute();
+                $asset->use_text .= ' â†’ '.$asset->assigned->getFullNameAttribute();
             }
 
 
@@ -730,11 +730,18 @@ class AssetsController extends Controller
         if ($asset) {
             // We don't want to log this as a normal update, so let's bypass that
             $asset->unsetEventDispatcher();
+
             $asset->next_audit_date = $request->input('next_audit_date');
             $asset->last_audit_date = date('Y-m-d h:i:s');
+            if (is_null($target = $asset->assignedTo)){
+               $asset->location_id = $request->input('location_id');
+            }
+
 
             if ($asset->save()) {
-                $log = $asset->logAudit(request('note'),request('location_id'));
+                $location = Location::find(request('location_id'))['name'];
+                $log = $asset->logAudit(request('note').$location,request('note'));
+
                 return response()->json(Helper::formatStandardApiResponse('success', [
                     'asset_tag'=> e($asset->asset_tag),
                     'note'=> e($request->input('note')),
